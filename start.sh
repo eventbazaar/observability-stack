@@ -52,7 +52,13 @@ export MONGODB_PORT
 # Start the observability stack
 echo "🐳 Starting Docker containers..."
 cd docker
-docker-compose up -d
+# Use sudo if user is not in docker group
+if groups $USER | grep -q '\bdocker\b'; then
+    docker-compose up -d
+else
+    echo "⚠️  User not in docker group, using sudo..."
+    sudo docker-compose up -d
+fi
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to be ready..."
@@ -60,7 +66,11 @@ sleep 30
 
 # Check service status
 echo "🔍 Checking service status..."
-docker-compose ps
+if groups $USER | grep -q '\bdocker\b'; then
+    docker-compose ps
+else
+    sudo docker-compose ps
+fi
 
 echo ""
 echo "✅ Observability Stack is running!"
